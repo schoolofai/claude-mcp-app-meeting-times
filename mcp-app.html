@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Meeting times</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        --bg: #f6f4ef;
+        --ink: #1c1917;
+        --muted: #57534e;
+        --card: #fff;
+        --line: #e7e5e4;
+        --accent: #d97757;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #1c1917;
+          --ink: #f5f5f4;
+          --muted: #a8a29e;
+          --card: #292524;
+          --line: #44403c;
+        }
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: ui-sans-serif, system-ui, sans-serif;
+        background: var(--bg);
+        color: var(--ink);
+        padding: 16px;
+      }
+      h1 { font-size: 1.1rem; margin: 0 0 12px; font-weight: 650; }
+      .board { display: grid; gap: 8px; }
+      .row {
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 12px 14px;
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        align-items: baseline;
+      }
+      .label { font-weight: 650; }
+      .zone { color: var(--muted); font-size: 0.8rem; }
+      .time { font-size: 1.25rem; font-variant-numeric: tabular-nums; font-weight: 700; }
+      .meta { color: var(--muted); font-size: 0.85rem; text-align: right; }
+      form, .controls {
+        display: flex; flex-wrap: wrap; gap: 8px;
+        margin: 12px 0 16px; align-items: end;
+      }
+      label { font-size: 0.8rem; color: var(--muted); display: flex; flex-direction: column; gap: 4px; }
+      input {
+        font: inherit; padding: 6px 8px; border-radius: 8px;
+        border: 1px solid var(--line); background: var(--card); color: var(--ink);
+        min-width: 13rem;
+      }
+      button {
+        font: inherit; font-weight: 650; border: 0; border-radius: 8px;
+        padding: 8px 12px; background: var(--accent); color: #fff; cursor: pointer;
+      }
+      .error { color: #b91c1c; font-size: 0.9rem; }
+      .empty { color: var(--muted); }
+    </style>
+  </head>
+  <body>
+    <h1>Meeting times</h1>
+    <div class="controls">
+      <label>When
+        <input id="when" type="text" placeholder="2026-11-11T15:00" autocomplete="off" />
+      </label>
+      <label>In this time zone
+        <input id="from-zone" type="text" value="Europe/London" autocomplete="off" />
+      </label>
+      <button id="refresh" type="button">Update board</button>
+    </div>
+    <p id="error" class="error" hidden></p>
+    <div id="board" class="board"><p class="empty">Ask for a meeting time to fill the board.</p></div>
+    <script type="module" src="/src/mcp-app.ts"></script>
+  </body>
+</html>
