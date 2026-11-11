@@ -4,7 +4,7 @@ A tiny [MCP App](https://modelcontextprotocol.io/docs/extensions/apps) that show
 
 This is the sample from the ProAI Clips video on building an MCP App and opening it in Claude. It follows the official [MCP Apps getting started](https://claude.com/docs/connectors/building/mcp-apps/getting-started) pattern and the [`ext-apps` quickstart](https://github.com/modelcontextprotocol/ext-apps/tree/main/examples/quickstart).
 
-Watch the video: [VIDEO_URL](VIDEO_URL)
+Watch the video: [https://youtu.be/wUDbsUiiMVE](https://youtu.be/wUDbsUiiMVE)
 
 There are no API keys. Time zones use the IANA names your runtime already knows, through `Intl.DateTimeFormat`.
 
