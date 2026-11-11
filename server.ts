@@ -9,10 +9,35 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { z } from "zod";
 
-const DIST_DIR = path.join(
-  path.dirname(fileURLToPath(import.meta.url)),
-  "dist",
-);
+const MODULE_DIR = path.dirname(fileURLToPath(import.meta.url));
+
+/** Load the bundled MCP App view. Checks a few locations so the same
+ *  server works locally (Vite writes dist/) and on a Vercel Function
+ *  (includeFiles copies dist/mcp-app.html into the function bundle). */
+async function loadAppHtml(): Promise<string> {
+  const candidates = [
+    path.join(process.cwd(), "dist", "mcp-app.html"),
+    path.join(MODULE_DIR, "dist", "mcp-app.html"),
+    path.join(MODULE_DIR, "..", "dist", "mcp-app.html"),
+    path.join(MODULE_DIR, "mcp-app.html"),
+  ];
+  const seen = new Set<string>();
+  const errors: string[] = [];
+  for (const candidate of candidates) {
+    const resolved = path.resolve(candidate);
+    if (seen.has(resolved)) continue;
+    seen.add(resolved);
+    try {
+      return await fs.readFile(resolved, "utf-8");
+    } catch (err) {
+      const code = (err as NodeJS.ErrnoException).code ?? "ERR";
+      errors.push(`${resolved} (${code})`);
+    }
+  }
+  throw new Error(
+    `Meeting-times UI HTML was not found. Run npm run build first. Tried: ${errors.join("; ")}`,
+  );
+}
 
 export const DEFAULT_ZONES = [
   "Europe/London",
@@ -263,10 +288,7 @@ export function createServer(): McpServer {
     resourceUri,
     { mimeType: RESOURCE_MIME_TYPE },
     async () => {
-      const html = await fs.readFile(
-        path.join(DIST_DIR, "mcp-app.html"),
-        "utf-8",
-      );
+      const html = await loadAppHtml();
       return {
         contents: [
           { uri: resourceUri, mimeType: RESOURCE_MIME_TYPE, text: html },

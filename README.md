@@ -67,37 +67,47 @@ npx @modelcontextprotocol/inspector --cli http://localhost:3001/mcp --transport 
 
 ### Try it in Claude as a custom connector
 
-Claude needs a public HTTPS URL to add a local server as a custom connector. Anthropic's [testing docs](https://claude.com/docs/connectors/building/testing#test-a-local-server) recommend a Cloudflare Tunnel or ngrok.
+Claude needs a public HTTPS URL, because it reaches your server from Anthropic's infrastructure. The ProAI Clips video uses a Vercel Function deploy of this same app, not a tunnel in front of a local process.
 
-1. Leave this server running on port 3001.
-2. In another terminal, start a quick tunnel, for example:
+#### Deploy to Vercel
 
-   ```bash
-   cloudflared tunnel --url http://localhost:3001
-   ```
+This is the path the ProAI Clips video uses. The Function in `api/mcp.ts` serves streamable HTTP, stays stateless per request, and returns the same bundled `ui://` view. `vercel.json` rewrites `/mcp` to that Function. The production build (`npm run build`) bundles the view HTML before the Function is packaged.
 
-3. Copy the `trycloudflare.com` hostname (no `https://`) and restart the server with that host allowed. `createMcpExpressApp` only accepts `localhost` in the `Host` header unless you set `ALLOWED_HOSTS`:
+A current demo, which may be taken down after the video is filmed:
 
-   ```bash
-   ALLOWED_HOSTS=your-subdomain.trycloudflare.com npm start
-   ```
+```
+https://claude-mcp-app-meeting-times.vercel.app/mcp
+```
 
-   If you prefer, start the tunnel first, then start the server with `ALLOWED_HOSTS` already set.
+To deploy your own copy, publish this repo to your own Vercel project. The connector URL will be `https://<your-project>.vercel.app/mcp`. If Deployment Protection blocks Claude, disable it only for that project. Do not put secrets in the project.
 
-4. In Claude, add the connector at **Customize → Connectors → Add → Add custom connector**. Use the tunnel URL ending in `/mcp`, for example `https://your-subdomain.trycloudflare.com/mcp`. Keep the detected auth setting, or choose **No sign-in** if that is what the form shows for this sample. Then **Add**, and **Connect** if Claude shows that button.
+You can check a live URL with:
 
-Official steps: [Add a custom connector](https://claude.com/docs/connectors/custom/add-unlisted#add-a-connector-by-url). On Free, Pro, Max, and Ultra you add it from Customize. On Team and Enterprise, an Owner adds it in organization settings. On Free, you can have one custom connector.
+```bash
+npx @modelcontextprotocol/inspector --cli https://claude-mcp-app-meeting-times.vercel.app/mcp --transport http --method tools/list
+```
 
-The tunnel publishes your local server on the public internet. Keep it running only while you test, and do not put secrets in this project.
+Official [testing docs](https://claude.com/docs/connectors/building/testing#test-a-local-server) also describe a Cloudflare Tunnel or ngrok in front of a local server. That is a documented alternative, not the path this video uses.
 
-There is no staging environment. You test a custom connector in production, against your own Claude account.
+#### Add it in Claude
+
+Official steps: [Add a custom connector](https://claude.com/docs/connectors/custom/add-unlisted#add-a-connector-by-url).
+
+1. In Claude, go to **Customize → Connectors → Add → Add custom connector**.
+2. Name the connector, for example `Meeting times`.
+3. Remote MCP server URL: your public HTTPS URL ending in `/mcp`. For the current demo, use `https://claude-mcp-app-meeting-times.vercel.app/mcp`.
+4. Keep the detected auth setting, or choose **No sign-in** if that is what the form shows for this sample. Then **Add**, and **Connect** if Claude shows that button.
+
+On Free, Pro, Max, and Ultra you add it from Customize. On the Free plan, you can have one custom connector. On Team and Enterprise, an Owner adds it in organization settings, and each member then connects with their own account.
+
+There is no staging environment. You test a custom connector in production, against your own Claude account. Do not put secrets in this project.
 
 ## Environment
 
 | Variable | Purpose |
 |---|---|
 | `PORT` | HTTP port (default `3001`) |
-| `ALLOWED_HOSTS` | Extra hostnames allowed in the `Host` header, comma-separated, with no scheme. Use this for a tunnel hostname. `localhost`, `127.0.0.1`, and `[::1]` are always allowed. |
+| `ALLOWED_HOSTS` | Extra hostnames allowed in the `Host` header, comma-separated, with no scheme. Needed if you front the local Express server with another hostname. `localhost`, `127.0.0.1`, and `[::1]` are always allowed. A Vercel Function deploy does not use this variable. |
 
 Do not commit `.env` files or tunnel URLs.
 
